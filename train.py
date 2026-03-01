@@ -3,6 +3,9 @@ Minimal PyTorch LSTM for NEPSE Stock Price Prediction
 Predicts 3, 5, and 7-day future prices
 """
 
+from __future__ import annotations
+from typing import Optional
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -26,29 +29,29 @@ torch.backends.cudnn.benchmark = True  # Auto-optimize for GPU
 
 # Simple LSTM Model
 class StockLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size=128, num_layers=2):
+    def __init__(self, input_size: int, hidden_size: int = 128, num_layers: int = 2) -> None:
         super(StockLSTM, self).__init__()
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, 
                            batch_first=True, dropout=0.2)
         self.fc = nn.Linear(hidden_size, 3)  # Predict 3, 5, 7 days
         
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         lstm_out, _ = self.lstm(x)
         return self.fc(lstm_out[:, -1, :])  # Last time step
 
 # Dataset
 class StockDataset(Dataset):
-    def __init__(self, sequences, targets):
+    def __init__(self, sequences: np.ndarray, targets: np.ndarray) -> None:
         self.X = torch.FloatTensor(sequences)
         self.y = torch.FloatTensor(targets)
     
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.X)
     
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor]:
         return self.X[idx], self.y[idx]
 
-def prepare_data(df):
+def prepare_data(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     """Prepare sequences and targets"""
     print("Preparing data...")
     
@@ -84,7 +87,7 @@ def prepare_data(df):
     
     return np.array(sequences), np.array(targets)
 
-def train_model():
+def train_model() -> None:
     """Main training function"""
     print(f"Using device: {DEVICE}")
     
@@ -263,3 +266,4 @@ def train_model():
 
 if __name__ == "__main__":
     train_model()
+
