@@ -2,6 +2,9 @@
 Make predictions on new data using the trained model
 """
 
+from __future__ import annotations
+from typing import Optional
+
 import torch
 import torch.nn as nn
 import pandas as pd
@@ -10,17 +13,17 @@ import numpy as np
 SEQUENCE_LENGTH = 30
 
 class StockLSTM(nn.Module):
-    def __init__(self, input_size, hidden_size=128, num_layers=2):
+    def __init__(self, input_size: int, hidden_size: int = 128, num_layers: int = 2) -> None:
         super(StockLSTM, self).__init__()
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, 
                            batch_first=True, dropout=0.2)
         self.fc = nn.Linear(hidden_size, 3)
         
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         lstm_out, _ = self.lstm(x)
         return self.fc(lstm_out[:, -1, :])
 
-def predict_stock(symbol, model_path='best_model.pth', data_path='nepse_stock_data_merged_deduped.csv'):
+def predict_stock(symbol: str, model_path: str = 'best_model.pth', data_path: str = 'nepse_stock_data_merged_deduped.csv') -> Optional[np.ndarray]:
     """Predict future prices for a specific stock"""
     
     # Load model and scalers
@@ -91,3 +94,4 @@ if __name__ == "__main__":
             predict_stock(stock)
         except Exception as e:
             print(f"Error predicting {stock}: {e}")
+
